@@ -17,3 +17,8 @@ C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.cspr
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.csproj.CopyComplete
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.exe
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.pdb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\Block.xnb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\Block2.xnb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\Board.xnb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\Fonts\PressStart.spritefont
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\PressStart.xnb
