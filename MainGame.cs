@@ -19,9 +19,10 @@ namespace ZTetris
         KeyboardState previousState;
         KeyboardState currentState;
 
+        Camera camera;
 
         Board Board;
-        List<IGameObject> GameObjects;
+        List<IGameEntity> GameEntities;
         List<Tetromino> Tetrominoes;
 
         List<GameText> GameTexts;
@@ -30,6 +31,8 @@ namespace ZTetris
 
         public MainGame()
         {
+            this.Window.AllowUserResizing = true;
+
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Assets";
         }
@@ -44,18 +47,22 @@ namespace ZTetris
         {
             // TODO: Add your initialization logic here
 
+            IsMouseVisible = true;
+
             GameTexts = new List<GameText>();
             GameTexts.Add(new GameText());
+
+            camera = new Camera(GraphicsDevice.Viewport);
 
             Board = new Board(); 
 
             Tetrominoes = new List<Tetromino>();
             Tetrominoes.Add(new Tetromino(random));
 
-            GameObjects = new List<IGameObject>();
-            GameObjects.AddRange(GameTexts);
-            GameObjects.AddRange(Tetrominoes);
-            GameObjects.Add(Board);
+            GameEntities = new List<IGameEntity>();
+            GameEntities.AddRange(GameTexts);
+            GameEntities.AddRange(Tetrominoes);
+            GameEntities.Add(Board);
 
 
             base.Initialize();
@@ -72,7 +79,7 @@ namespace ZTetris
 
             // TODO: use this.Content to load your game content here
             Block.Texture = this.Content.Load<Texture2D>("Block"); //16px*16px texture
-            Board.Texture = this.Content.Load<Texture2D>("Board"); //336px*192px texture
+            Board.Texture = this.Content.Load<Texture2D>("Board"); //192px*336px texture
 
             GameText.Font = this.Content.Load<SpriteFont>("PressStart");
 
@@ -94,6 +101,8 @@ namespace ZTetris
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
+
             previousState = currentState;
             currentState = Keyboard.GetState();
 
@@ -114,11 +123,20 @@ namespace ZTetris
 
             if (currentState.IsKeyDown(Keys.S) && previousState.IsKeyUp(Keys.S))
             {
+                Board.AddTetrominoToBoard(Tetrominoes[0]);
+                //
+            }
+            if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
+            {
+                Board.AddTetrominoToBoard(Tetrominoes[0]);
+                GameEntities.Remove(Tetrominoes[0]);
+                Tetrominoes[0] = new Tetromino(random);
+                GameEntities.Add(Tetrominoes[0]);
                 //
             }
 
 
-            if (Board.DoBlockStatesConflict(Tetrominoes[0], Tetrominoes[0].XCoordinate , Tetrominoes[0].YCoordinate))
+            if (Board.IsConflict(Tetrominoes[0]))
             {
                 GameTexts[0].IsConflict = true;
             }
@@ -147,8 +165,27 @@ namespace ZTetris
                 Tetrominoes[0].YCoordinate += 1;
             }
 
+            if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q))
+            {
+                //
+            }
+
+            if (currentState.IsKeyDown(Keys.E) && previousState.IsKeyUp(Keys.E))
+            {
+                Board.TEST_FillBoard();
+            }
+
+
 
             // TODO: Add your update logic here
+
+            camera.Update(GraphicsDevice.Viewport);
+
+            foreach (IGameEntity gameEntity in GameEntities)
+            {
+                gameEntity.Update(gameTime);
+            }
+
 
             base.Update(gameTime);
         }
@@ -164,22 +201,16 @@ namespace ZTetris
 
             // TODO: Add your drawing code here
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(transformMatrix: camera.Transform);
 
-            //Board.Draw(spriteBatch);
-
-            //Tetrominoes[0].Draw(spriteBatch);
-
-            foreach (IGameObject gameObject in GameObjects)
+            foreach (IGameEntity gameObject in GameEntities)
             {
                 gameObject.Draw(spriteBatch);
             }
 
-
             spriteBatch.End();
 
             
-
             base.Draw(gameTime);
         }
     }

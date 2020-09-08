@@ -3,47 +3,62 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace ZTetris.Assets
 {
-    class Board : IGameObject
+    class Board : IGameEntity
     {
         public static Texture2D Texture;
 
-        bool[,] BlockState = new bool[22, 10];
-        Block[,] Blocks = new Block[22, 10];
+        int XLength = 10;
+        int YLength = 22;
 
+        public int Score;
 
+        Block[,] Blocks;
 
-        public Board()
+        //Constructor
+        public Board(int xLength = 10, int yLength = 22) //this is the conventional default tetris board size
         {
-            BlockState[2, 1] = true;
-            Blocks[2, 1] = new Block(1, 2);
-            BlockState[15, 6] = true;
-            Blocks[15, 6] = new Block(6, 15);
+            XLength = xLength;
+            YLength = yLength;
+            Blocks = new Block[YLength, XLength];
+        }
+        //End Constructor
+
+        public void TEST_FillBoard()
+        {
+            for (int y = 0; y < YLength; y++)
+            {
+                for (int x = 0; x < XLength - 2; x++)
+                {
+                    Blocks[y, x] = new Block(x, y, Color.White);
+                }
+            }
         }
 
-        public bool DoBlockStatesConflict(Tetromino tetromino, int xOffset, int yOffset)
+        public bool IsConflict(Tetromino tetromino)
         {
-
-
             for (int y = 0; y < tetromino.BlockState.GetLength(0); y++)
             {
                 for (int x = 0; x < tetromino.BlockState.GetLength(1); x++)
                 {
-                    if (y + yOffset >= BlockState.GetLength(0) || x + xOffset >= BlockState.GetLength(1) || y + yOffset < 0 || x + xOffset < 0)
+                    if (y + tetromino.YCoordinate >= YLength || x + tetromino.XCoordinate >= XLength || y + tetromino.YCoordinate < 0 || x + tetromino.XCoordinate < 0)
                     {
-                        if (tetromino.BlockState[y, x])
+                        if (tetromino.Blocks[y, x] != null)
                         {
                             return true;
                         }
                         continue;
                     }
-                    if (BlockState[y + yOffset, x + xOffset] && tetromino.BlockState[y, x])
+                    if (Blocks[y + tetromino.YCoordinate, x + tetromino.XCoordinate] != null && tetromino.BlockState[y, x] == true)
                     {
                         return true;
                     }
@@ -51,7 +66,71 @@ namespace ZTetris.Assets
             }
             return false;
         }
+        public void AddTetrominoToBoard(Tetromino tetromino)
+        {
+            if (IsConflict(tetromino)) 
+            {
+                return;
+            }
 
+
+            for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
+            {
+                for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
+                {
+                    if (tetromino.BlockState[y, x] == true)
+                    {
+                        Blocks[y + tetromino.YCoordinate, x + tetromino.XCoordinate] = tetromino.Blocks[y, x];
+                    }
+                }
+            }
+        }
+
+        public void UpdateLines()
+        {
+            for (int y = 0; y < Blocks.GetLength(0); y++)
+            {
+                bool SkipLine = false;
+                for (int x = 0; x < Blocks.GetLength(1); x++)
+                {
+                    if (Blocks[y, x] == null)
+                    {
+                        SkipLine = true;
+                        break;
+                    }
+                }
+                if (SkipLine == false)
+                {
+                    ClearLine(y);
+                }
+            }
+        }
+
+        public void ClearLine(int fromY)
+        {
+            Score += 1;
+            for (int y = fromY; y > 0; y--)
+            {
+                for (int x = 0; x < XLength; x++)
+                {
+                    Blocks[y, x] = Blocks[y - 1, x];
+                    Blocks[y - 1, x] = null;
+                    if (Blocks[y, x] != null)
+                    {
+                        Blocks[y, x].Coordinates = new Coordinate(x, y);
+                    }
+                }
+            }
+        }
+
+        //Interface Methods
+        public void Update(GameTime gameTime)
+        {
+
+            UpdateLines();
+
+            GameText.Score = Score.ToString();
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, new Vector2(0, 32), Color.White); //draws the board
@@ -67,6 +146,6 @@ namespace ZTetris.Assets
                 }
             }
         }
-
+        //End Interface Methods
     }
 }

@@ -5,30 +5,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZTetris.Assets;
 
 namespace ZTetris
 {
-    class GameText : IGameObject
+    class GameText : IGameEntity
     {
         public static SpriteFont Font;
         public bool IsConflict { get; set; }
-        private string Text;
+        public string ConflictText { get; set; }
+
+        public static string Score;
         public GameText()
         {
 
         }
-        public void Draw(SpriteBatch spriteBatch)
+
+        public void Update(GameTime gameTime)
         {
             if (IsConflict)
             {
-                Text = "Conflict = TRUE";
+                ConflictText = "Conflict = TRUE";
             }
             else
             {
-                Text = "Conflict = FALSE";
+                ConflictText = "Conflict = FALSE";
             }
-            spriteBatch.DrawString(Font, Text, new Vector2(192, 128), Color.White);
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.DrawString(Font, Score, new Vector2(160, 0), Color.White);
+            spriteBatch.DrawString(Font, ConflictText, new Vector2(192, 128), Color.White);
             spriteBatch.DrawString(Font, "Next:", new Vector2(192, 32), Color.White);
+            spriteBatch.DrawString(Font, 
+                "Controls:\n" +
+                "ARROW KEYS - move\n" +
+                "A - rotate anticlockwise\n" +
+                "D - rotate clockwise\n" +
+                "S - add piece to board\n" +
+                "Space - new tetromino\n"
+                , new Vector2(-300, 32), Color.White);
+
         }
     }
 }
