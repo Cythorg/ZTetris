@@ -55,6 +55,7 @@
     <Compile Include="Block.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tetromino.cs" />
+    <Compile Include="TetrominoManager.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

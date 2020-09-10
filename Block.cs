@@ -13,55 +13,40 @@ namespace ZTetris
     {
         public static Texture2D Texture;
 
-        private Coordinate coordinates;
         public Coordinate Coordinates
         {
-            get
-            {
-                return coordinates;
-            }
+            get => coordinates;
             set
             {
                 coordinates = value;
-                position = new Vector2(16 * coordinates.X + 16, 16 * coordinates.Y);
+                position = new Vector2(Settings.GridSize * coordinates.X + Settings.GridSize, Settings.GridSize * coordinates.Y);
             }
         }
-
-
+        private Coordinate coordinates;
         private Vector2 position;
-        public Color Color;
+
+        public Color Color
+        { 
+            get => color;
+            set => color = value;
+        }
+        private Color color = Color.White;
 
         //Constructors
-        public Block(int x, int y)
+        public Block(Coordinate coordinates, Color? color = null)
         {
-            Coordinates = new Coordinate(x, y);
-            //Position = new Vector2(16 * Coordinates.X + 16, 16 * Coordinates.Y);
-            Color = Color.White;
+            Coordinates = coordinates;
+            Color = color ?? this.color;
         }
-        public Block(int x, int y, Color color)
-        {
-            Coordinates = new Coordinate(x, y);
-            //Position = new Vector2(16 * Coordinates.X + 16, 16 * Coordinates.Y);
-            Color = color;
-        }
-        //End Constructors
+        //End Constructor
 
-        //Operator Overloads
-        //public static bool operator ==(Block op1, Block op2)
-        //{
-        //    return op1.Equals(op2);
-        //}
-        //public static bool operator !=(Block op1, Block op2)
-        //{
-        //    return !op1.Equals(op2);
-        //}
-        //TODO: Override 'Object.Equals' and 'Object.GetHashCode' in Block struct
-        //End Operator Overloads
+
+        public Block Clone() => (Block)this.MemberwiseClone();
 
         //Interface Methods
         public void Update(GameTime gameTime)
         {
-            //Position = new Vector2(16 * Coordinates.X + 16, 16 * Coordinates.Y);
+            //
         }
         public void Draw(SpriteBatch spriteBatch)
         {

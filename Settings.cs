@@ -17,5 +17,9 @@ namespace ZTetris
         public static Color JPieceColor = new Color(0, 0, 255);   //blue
         public static Color SPieceColor = new Color(0, 255, 0);   //green
         public static Color ZPieceColor = new Color(255, 0, 0);   //red
+
+        public static Color GhostPieceColor = new Color(30, 30, 30); //anything!
+
+        public static int GridSize = 16;
     }
 }

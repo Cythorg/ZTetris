@@ -15,7 +15,7 @@ namespace ZTetris
         public bool IsConflict { get; set; }
         public string ConflictText { get; set; }
 
-        public static string Score;
+        public static string LinesCleared;
         public GameText()
         {
 
@@ -35,7 +35,7 @@ namespace ZTetris
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(Font, Score, new Vector2(160, 0), Color.White);
+            spriteBatch.DrawString(Font, "Lines Cleared: " + LinesCleared, new Vector2(192, 352), Color.White);
             spriteBatch.DrawString(Font, ConflictText, new Vector2(192, 128), Color.White);
             spriteBatch.DrawString(Font, "Next:", new Vector2(192, 32), Color.White);
             spriteBatch.DrawString(Font, 

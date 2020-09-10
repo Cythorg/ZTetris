@@ -57,7 +57,7 @@ namespace ZTetris
             Board = new Board(); 
 
             Tetrominoes = new List<Tetromino>();
-            Tetrominoes.Add(new Tetromino(random));
+            Tetrominoes.Add(new Tetromino((PieceShape)random.Next(Enum.GetValues(typeof(PieceShape)).Length)));
 
             GameEntities = new List<IGameEntity>();
             GameEntities.AddRange(GameTexts);
@@ -128,9 +128,10 @@ namespace ZTetris
             }
             if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
             {
+                Board.MoveTetrominoToGhost(Tetrominoes[0]);
                 Board.AddTetrominoToBoard(Tetrominoes[0]);
                 GameEntities.Remove(Tetrominoes[0]);
-                Tetrominoes[0] = new Tetromino(random);
+                Tetrominoes[0] = new Tetromino((PieceShape)random.Next(Enum.GetValues(typeof(PieceShape)).Length));
                 GameEntities.Add(Tetrominoes[0]);
                 //
             }
@@ -147,27 +148,27 @@ namespace ZTetris
 
             if (currentState.IsKeyDown(Keys.Right) && previousState.IsKeyUp(Keys.Right))
             {
-                Tetrominoes[0].XCoordinate += 1;
+                Tetrominoes[0].Coordinates += new Coordinate(1, 0);
             }
 
             if (currentState.IsKeyDown(Keys.Left) && previousState.IsKeyUp(Keys.Left))
             {
-                Tetrominoes[0].XCoordinate -= 1;
+                Tetrominoes[0].Coordinates -= new Coordinate(1, 0);
             }
 
             if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
             {
-                Tetrominoes[0].YCoordinate -= 1;
+                Tetrominoes[0].Coordinates -= new Coordinate(0, 1);
             }
 
             if (currentState.IsKeyDown(Keys.Down) && previousState.IsKeyUp(Keys.Down))
             {
-                Tetrominoes[0].YCoordinate += 1;
+                Tetrominoes[0].Coordinates += new Coordinate(0, 1);
             }
 
             if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q))
             {
-                //
+                Board.MoveTetrominoToGhost(Tetrominoes[0]);
             }
 
             if (currentState.IsKeyDown(Keys.E) && previousState.IsKeyUp(Keys.E))
@@ -180,6 +181,8 @@ namespace ZTetris
             // TODO: Add your update logic here
 
             camera.Update(GraphicsDevice.Viewport);
+
+            //Board.GhostTetromino(Tetrominoes[0]).Update(gameTime); //TODO: throws null when tetromino.Y > 22
 
             foreach (IGameEntity gameEntity in GameEntities)
             {
@@ -197,17 +200,18 @@ namespace ZTetris
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
-
             // TODO: Add your drawing code here
-
             spriteBatch.Begin(transformMatrix: camera.Transform);
+            //Drawing Code
 
-            foreach (IGameEntity gameObject in GameEntities)
+            Board.GhostTetromino(Tetrominoes[0]).Draw(spriteBatch);
+
+            foreach (IGameEntity gameEntity in GameEntities)
             {
-                gameObject.Draw(spriteBatch);
+                gameEntity.Draw(spriteBatch);
             }
 
+            //End Drawing Code
             spriteBatch.End();
 
             

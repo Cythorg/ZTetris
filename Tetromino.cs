@@ -3,37 +3,98 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using ZTetris.Assets;
 
 namespace ZTetris
 {
+    enum PieceShape { I, O, T, L, J, S, Z }
     class Tetromino : IGameEntity
     {
-        public enum PieceShape { I, O, T, L, J, S, Z }
-        public PieceShape Shape;
-        private Color Color;
+        public PieceShape Shape { get; private set; }
 
-        public int XCoordinate;
-        public int YCoordinate;
+        public bool[,] BlockState
+        {
+            get => blockState;
+            set
+            {
+                blockState = value;
+                blocks = new Block[blockState.GetLength(0), blockState.GetLength(1)];
+                for (int y = 0; y < blockState.GetLength(0); y++)
+                {
+                    for (int x = 0; x < blockState.GetLength(1); x++)
+                    {
+                        if (blockState[y, x] == true)
+                            blocks[y, x] = new Block(new Coordinate(x, y) + Coordinates, color);
+                        else if (blockState[y, x] == false)
+                            blocks[y, x] = null;
+                    }
+                }
+            }
+        }
+        private bool[,] blockState;
+        public Block[,] Blocks
+        {
+            get => blocks;
+            set => blocks = value;
+        }
+        private Block[,] blocks;
 
-        public bool[,] BlockState;
-        public Block[,] Blocks;
+        public Coordinate Coordinates
+        {
+            get => coordinates;
+            set
+            {
+                coordinates = value;
+                for (int y = 0; y < Blocks.GetLength(0); y++)
+                {
+                    for (int x = 0; x < Blocks.GetLength(1); x++)
+                    {
+                        if (Blocks[y, x] != null)
+                        {
+                            Blocks[y, x].Coordinates = value + new Coordinate(x, y);
+                        }
+                    }
+                }
+            } 
+        }
+        private Coordinate coordinates;
+
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                for (int y = 0; y < Blocks.GetLength(0); y++)
+                {
+                    for (int x = 0; x < Blocks.GetLength(1); x++)
+                    {
+                        if (Blocks[y, x] != null)
+                        {
+                            Blocks[y, x].Color = value;
+                        }
+                    }
+                }
+            }
+        }
+        private Color color;
 
 
         //Constructor
-        public Tetromino(Random random)
+        public Tetromino(PieceShape shape)
         {
-            Shape = (PieceShape)random.Next(Enum.GetValues(typeof(PieceShape)).Length);
+            Shape = shape;
 
-
-            XCoordinate = 3;
-            YCoordinate = 0;
+            coordinates = new Coordinate(3, 0);
             switch (Shape) //TODO: Stop using blockstate and start using Block (Maybe)
             {
                 case PieceShape.I:
-                    Color = Settings.IPieceColor;       // cyan   
+                    color = Settings.IPieceColor;       // cyan   
                     BlockState = new bool[4, 4] {       
                         {false, true, false, false},    // []██[][]
                         {false, true, false, false},    // []██[][]
@@ -42,15 +103,15 @@ namespace ZTetris
                     };                                  
                     break;                                 
                 case PieceShape.O:                         
-                    Color = Settings.OPieceColor;       // yellow   
+                    color = Settings.OPieceColor;       // yellow   
                     BlockState = new bool[2, 2] {          
                         {true, true},                   // ████
                         {true, true}                    // ████
                     };                                  
-                    XCoordinate = 4;                    
+                    coordinates = new Coordinate(4, 0);                    
                     break;                                 
                 case PieceShape.T:                         
-                    Color = Settings.TPieceColor;       // magenta
+                    color = Settings.TPieceColor;       // magenta
                     BlockState = new bool[3, 3] {          
                         {false, true , false},          // []██[]
                         {true , true , true },          // ██████
@@ -58,7 +119,7 @@ namespace ZTetris
                     };                                  
                     break;                              
                 case PieceShape.L:                      
-                    Color = Settings.LPieceColor;       // orange
+                    color = Settings.LPieceColor;       // orange
                     BlockState = new bool[3, 3] {       
                         {false, false, true },          // [][]██
                         {true , true , true },          // ██████
@@ -66,7 +127,7 @@ namespace ZTetris
                     };                                  
                     break;                              
                 case PieceShape.J:                      
-                    Color = Settings.JPieceColor;       // blue
+                    color = Settings.JPieceColor;       // blue
                     BlockState = new bool[3, 3] {       
                         {true , false, false},          // ██[][]
                         {true , true , true },          // ██████
@@ -74,7 +135,7 @@ namespace ZTetris
                     };                                  
                     break;                              
                 case PieceShape.S:                      
-                    Color = Settings.SPieceColor;       // green
+                    color = Settings.SPieceColor;       // green
                     BlockState = new bool[3, 3] {       
                         {false, true , true },          // []████
                         {true , true , false},          // ████[]
@@ -82,7 +143,7 @@ namespace ZTetris
                     };                                  
                     break;                              
                 case PieceShape.Z:                      
-                    Color = Settings.ZPieceColor;       // red
+                    color = Settings.ZPieceColor;       // red
                     BlockState = new bool[3, 3] {       
                         {true , true , false},          // ████[]
                         {false, true , true },          // []████
@@ -92,7 +153,6 @@ namespace ZTetris
                 default:
                     break;
             }
-            Blocks = CreateBlocksFromBlockState(BlockState, Color);
         }
         //End Constructor
 
@@ -108,7 +168,6 @@ namespace ZTetris
                 }
             }
             BlockState = RotatedBlockState;
-            Blocks = CreateBlocksFromBlockState(BlockState, Color);
         }
         public void RotateAntiClockwise()
         {
@@ -122,46 +181,22 @@ namespace ZTetris
                 }
             }
             BlockState = RotatedBlockState;
-            Blocks = CreateBlocksFromBlockState(BlockState, Color);
         }
 
-        //Private Methods
-        private Block[,] CreateBlocksFromBlockState (bool[,] blockState, Color color)
-        {
-            Block[,] blocks = new Block[blockState.GetLength(0), blockState.GetLength(1)];
-            for (int y = 0; y < blockState.GetLength(0); y++)
-            {
-                for (int x = 0; x < blockState.GetLength(1); x++)
-                {
-                    if (blockState[y, x] == true)
-                    {
-                        blocks[y, x] = new Block(x + XCoordinate, y + YCoordinate, color);
-                    }
-                    else if(blockState[y, x] == false)
-                    {
-                        blocks[y, x] = null;
-                    }
-                }
-            }
-            return blocks;
-        }
-        //End Private Methods
 
         //Interface Methods
         public void Update(GameTime gameTime)
         {
-            Blocks = CreateBlocksFromBlockState(BlockState, Color);
+            //
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            for (int y = 0; y < BlockState.GetLength(0); y++)
+            for (int y = 0; y < Blocks.GetLength(0); y++)
             {
-                for (int x = 0; x < BlockState.GetLength(1); x++)
+                for (int x = 0; x < Blocks.GetLength(1); x++)
                 {
-                    if (BlockState[y, x])
-                    {
+                    if (Blocks[y, x] != null)
                         Blocks[y, x].Draw(spriteBatch);
-                    }
                 }
             }
         }

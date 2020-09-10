@@ -17,12 +17,23 @@ namespace ZTetris.Assets
     {
         public static Texture2D Texture;
 
-        int XLength = 10;
-        int YLength = 22;
+        public int XLength { get; private set; }
+        public int YLength { get; private set; }
 
-        public int Score;
+        public int LinesCleared;
 
-        Block[,] Blocks;
+        Block[,] Blocks
+        {
+            get
+            {
+                return blocks;
+            }
+            set
+            {
+                blocks = value;
+            }
+        }
+        private Block[,] blocks;
 
         //Constructor
         public Board(int xLength = 10, int yLength = 22) //this is the conventional default tetris board size
@@ -39,48 +50,63 @@ namespace ZTetris.Assets
             {
                 for (int x = 0; x < XLength - 2; x++)
                 {
-                    Blocks[y, x] = new Block(x, y, Color.White);
+                    Blocks[y, x] = new Block(new Coordinate(x, y));
                 }
             }
         }
 
+        public Tetromino GhostTetromino(Tetromino tetromino)
+        {
+            Tetromino ghostTetromino = new Tetromino(tetromino.Shape);
+            for (int y = tetromino.Coordinates.Y; y < YLength; y++)
+            {
+                ghostTetromino.Coordinates = new Coordinate(tetromino.Coordinates.X, y);
+                ghostTetromino.BlockState = tetromino.BlockState;
+                ghostTetromino.Color = Settings.GhostPieceColor;
+                if (IsConflict(ghostTetromino))
+                {
+                    ghostTetromino.Coordinates += new Coordinate(0, -1);
+                    break;
+                }
+            }
+            return ghostTetromino;
+        }
+
+        public void MoveTetrominoToGhost(Tetromino tetromino)
+        {
+            Tetromino ghostTetromino = GhostTetromino(tetromino);
+            tetromino.Coordinates = ghostTetromino.Coordinates;
+        }
+
         public bool IsConflict(Tetromino tetromino)
         {
-            for (int y = 0; y < tetromino.BlockState.GetLength(0); y++)
+            for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
             {
-                for (int x = 0; x < tetromino.BlockState.GetLength(1); x++)
+                for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
                 {
-                    if (y + tetromino.YCoordinate >= YLength || x + tetromino.XCoordinate >= XLength || y + tetromino.YCoordinate < 0 || x + tetromino.XCoordinate < 0)
+                    if (tetromino.Blocks[y, x] != null)
                     {
-                        if (tetromino.Blocks[y, x] != null)
-                        {
+                        if (y + tetromino.Coordinates.Y >= YLength || x + tetromino.Coordinates.X >= XLength || y + tetromino.Coordinates.Y < 0 || x + tetromino.Coordinates.X < 0)
                             return true;
-                        }
-                        continue;
-                    }
-                    if (Blocks[y + tetromino.YCoordinate, x + tetromino.XCoordinate] != null && tetromino.BlockState[y, x] == true)
-                    {
-                        return true;
+                        if (Blocks[y + tetromino.Coordinates.Y, x + tetromino.Coordinates.X] != null)
+                            return true;
                     }
                 }
             }
             return false;
         }
+
         public void AddTetrominoToBoard(Tetromino tetromino)
         {
-            if (IsConflict(tetromino)) 
-            {
-                return;
-            }
-
+            if (IsConflict(tetromino)) return;
 
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
             {
                 for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
                 {
-                    if (tetromino.BlockState[y, x] == true)
+                    if (tetromino.Blocks[y, x] != null)
                     {
-                        Blocks[y + tetromino.YCoordinate, x + tetromino.XCoordinate] = tetromino.Blocks[y, x];
+                        Blocks[y + tetromino.Coordinates.Y, x + tetromino.Coordinates.X] = tetromino.Blocks[y, x].Clone();
                     }
                 }
             }
@@ -108,11 +134,16 @@ namespace ZTetris.Assets
 
         public void ClearLine(int fromY)
         {
-            Score += 1;
-            for (int y = fromY; y > 0; y--)
+            LinesCleared += 1;
+            for (int y = fromY; y >= 0; y--)
             {
                 for (int x = 0; x < XLength; x++)
                 {
+                    if (y == 0)
+                    {
+                        Blocks[y, x] = null;
+                        continue;
+                    }
                     Blocks[y, x] = Blocks[y - 1, x];
                     Blocks[y - 1, x] = null;
                     if (Blocks[y, x] != null)
@@ -129,7 +160,7 @@ namespace ZTetris.Assets
 
             UpdateLines();
 
-            GameText.Score = Score.ToString();
+            GameText.LinesCleared = LinesCleared.ToString();
         }
         public void Draw(SpriteBatch spriteBatch)
         {

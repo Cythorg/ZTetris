@@ -17,5 +17,10 @@ namespace ZTetris
             X = x;
             Y = y;
         }
+
+        public static Coordinate operator +(Coordinate left, Coordinate right) 
+            => new Coordinate(left.X + right.X, left.Y + right.Y);
+        public static Coordinate operator -(Coordinate left, Coordinate right) 
+            => new Coordinate(left.X - right.X, left.Y - right.Y);
     }
 }
