@@ -19,21 +19,27 @@ namespace ZTetris
         KeyboardState previousState;
         KeyboardState currentState;
 
+        Input input;
+
         Camera camera;
 
-        Board Board;
-        List<IGameEntity> GameEntities;
-        List<Tetromino> Tetrominoes;
+        Board board;
+        List<IGameEntity> gameEntities;
+        List<IGameComponent> gameComponents;
+        List<Tetromino> tetrominoes;
+        TetrominoManager tetrominoManager;
 
-        List<GameText> GameTexts;
+        List<GameText> gameTexts;
 
         Random random = new Random();
 
         public MainGame()
         {
-            this.Window.AllowUserResizing = true;
-
+            this.Window.AllowUserResizing = false;
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferHeight = 420;
+            graphics.PreferredBackBufferWidth = 350;
+
             Content.RootDirectory = "Assets";
         }
 
@@ -49,21 +55,30 @@ namespace ZTetris
 
             IsMouseVisible = true;
 
-            GameTexts = new List<GameText>();
-            GameTexts.Add(new GameText());
+            gameTexts = new List<GameText>();
+            gameTexts.Add(new GameText());
 
             camera = new Camera(GraphicsDevice.Viewport);
 
-            Board = new Board(); 
+            board = new Board(); 
 
-            Tetrominoes = new List<Tetromino>();
-            Tetrominoes.Add(new Tetromino((PieceShape)random.Next(Enum.GetValues(typeof(PieceShape)).Length)));
+            tetrominoManager = new TetrominoManager(board);
 
-            GameEntities = new List<IGameEntity>();
-            GameEntities.AddRange(GameTexts);
-            GameEntities.AddRange(Tetrominoes);
-            GameEntities.Add(Board);
 
+
+            gameEntities = new List<IGameEntity>();
+            gameEntities.AddRange(gameTexts);
+            gameEntities.Add(tetrominoManager);
+            gameEntities.Add(board);
+
+            gameComponents = new List<IGameComponent>();
+            gameComponents.Add(tetrominoManager);
+
+
+            foreach (IGameComponent gameComponent in gameComponents)
+            {
+                gameComponent.Initialize();
+            }
 
             base.Initialize();
         }
@@ -78,7 +93,7 @@ namespace ZTetris
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            Block.Texture = this.Content.Load<Texture2D>("Block"); //16px*16px texture
+            Block.Texture = this.Content.Load<Texture2D>("ThinBlock"); //16px*16px texture
             Board.Texture = this.Content.Load<Texture2D>("Board"); //192px*336px texture
 
             GameText.Font = this.Content.Load<SpriteFont>("PressStart");
@@ -107,74 +122,40 @@ namespace ZTetris
             currentState = Keyboard.GetState();
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
                 Exit();
-            }
-
-            if (currentState.IsKeyDown(Keys.D) && previousState.IsKeyUp(Keys.D))
-            {
-                Tetrominoes[0].RotateClockwise();
-            }
-
-            if (currentState.IsKeyDown(Keys.A) && previousState.IsKeyUp(Keys.A))
-            {
-                Tetrominoes[0].RotateAntiClockwise();
-            }
-
-            if (currentState.IsKeyDown(Keys.S) && previousState.IsKeyUp(Keys.S))
-            {
-                Board.AddTetrominoToBoard(Tetrominoes[0]);
-                //
-            }
-            if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
-            {
-                Board.MoveTetrominoToGhost(Tetrominoes[0]);
-                Board.AddTetrominoToBoard(Tetrominoes[0]);
-                GameEntities.Remove(Tetrominoes[0]);
-                Tetrominoes[0] = new Tetromino((PieceShape)random.Next(Enum.GetValues(typeof(PieceShape)).Length));
-                GameEntities.Add(Tetrominoes[0]);
-                //
-            }
-
-
-            if (Board.IsConflict(Tetrominoes[0]))
-            {
-                GameTexts[0].IsConflict = true;
-            }
-            else
-            {
-                GameTexts[0].IsConflict = false;
-            }
-
-            if (currentState.IsKeyDown(Keys.Right) && previousState.IsKeyUp(Keys.Right))
-            {
-                Tetrominoes[0].Coordinates += new Coordinate(1, 0);
-            }
 
             if (currentState.IsKeyDown(Keys.Left) && previousState.IsKeyUp(Keys.Left))
-            {
-                Tetrominoes[0].Coordinates -= new Coordinate(1, 0);
-            }
+                tetrominoManager.MoveLeft();
 
-            if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
-            {
-                Tetrominoes[0].Coordinates -= new Coordinate(0, 1);
-            }
+            if (currentState.IsKeyDown(Keys.Right) && previousState.IsKeyUp(Keys.Right))
+                tetrominoManager.MoveRight();
 
             if (currentState.IsKeyDown(Keys.Down) && previousState.IsKeyUp(Keys.Down))
-            {
-                Tetrominoes[0].Coordinates += new Coordinate(0, 1);
-            }
+                tetrominoManager.SoftDrop();
+
+            if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
+                tetrominoManager.HardDrop();
+
+            if (currentState.IsKeyDown(Keys.D) && previousState.IsKeyUp(Keys.D))
+                tetrominoManager.RotateClockwise();
+
+            if (currentState.IsKeyDown(Keys.A) && previousState.IsKeyUp(Keys.A))
+                tetrominoManager.RotateAntiClockwise();
+
+            if (currentState.IsKeyDown(Keys.S) && previousState.IsKeyUp(Keys.S))
+                tetrominoManager.Rotate180();
+
+            if (currentState.IsKeyDown(Keys.LeftShift) && previousState.IsKeyUp(Keys.LeftShift))
+                tetrominoManager.Hold();
+
+            if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
+                tetrominoManager.CurrentTetromino.Coordinates -= new Coordinate(0, 1);
+
 
             if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q))
-            {
-                Board.MoveTetrominoToGhost(Tetrominoes[0]);
-            }
+                tetrominoManager.CurrentTetromino.Position = new Vector2(4, 0);
 
-            if (currentState.IsKeyDown(Keys.E) && previousState.IsKeyUp(Keys.E))
-            {
-                Board.TEST_FillBoard();
-            }
+
 
 
 
@@ -184,7 +165,7 @@ namespace ZTetris
 
             //Board.GhostTetromino(Tetrominoes[0]).Update(gameTime); //TODO: throws null when tetromino.Y > 22
 
-            foreach (IGameEntity gameEntity in GameEntities)
+            foreach (IGameEntity gameEntity in gameEntities)
             {
                 gameEntity.Update(gameTime);
             }
@@ -201,12 +182,10 @@ namespace ZTetris
         {
             GraphicsDevice.Clear(Color.Black);
             // TODO: Add your drawing code here
-            spriteBatch.Begin(transformMatrix: camera.Transform);
+            spriteBatch.Begin(transformMatrix: camera.Transform, samplerState: SamplerState.PointClamp);
             //Drawing Code
 
-            Board.GhostTetromino(Tetrominoes[0]).Draw(spriteBatch);
-
-            foreach (IGameEntity gameEntity in GameEntities)
+            foreach (IGameEntity gameEntity in gameEntities)
             {
                 gameEntity.Draw(spriteBatch);
             }

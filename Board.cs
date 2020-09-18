@@ -17,10 +17,10 @@ namespace ZTetris.Assets
     {
         public static Texture2D Texture;
 
+        public int LinesCleared;
+
         public int XLength { get; private set; }
         public int YLength { get; private set; }
-
-        public int LinesCleared;
 
         Block[,] Blocks
         {
@@ -35,6 +35,7 @@ namespace ZTetris.Assets
         }
         private Block[,] blocks;
 
+
         //Constructor
         public Board(int xLength = 10, int yLength = 22) //this is the conventional default tetris board size
         {
@@ -44,44 +45,10 @@ namespace ZTetris.Assets
         }
         //End Constructor
 
-        public void TEST_FillBoard()
-        {
-            for (int y = 0; y < YLength; y++)
-            {
-                for (int x = 0; x < XLength - 2; x++)
-                {
-                    Blocks[y, x] = new Block(new Coordinate(x, y));
-                }
-            }
-        }
-
-        public Tetromino GhostTetromino(Tetromino tetromino)
-        {
-            Tetromino ghostTetromino = new Tetromino(tetromino.Shape);
-            for (int y = tetromino.Coordinates.Y; y < YLength; y++)
-            {
-                ghostTetromino.Coordinates = new Coordinate(tetromino.Coordinates.X, y);
-                ghostTetromino.BlockState = tetromino.BlockState;
-                ghostTetromino.Color = Settings.GhostPieceColor;
-                if (IsConflict(ghostTetromino))
-                {
-                    ghostTetromino.Coordinates += new Coordinate(0, -1);
-                    break;
-                }
-            }
-            return ghostTetromino;
-        }
-
-        public void MoveTetrominoToGhost(Tetromino tetromino)
-        {
-            Tetromino ghostTetromino = GhostTetromino(tetromino);
-            tetromino.Coordinates = ghostTetromino.Coordinates;
-        }
 
         public bool IsConflict(Tetromino tetromino)
         {
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
-            {
                 for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
                 {
                     if (tetromino.Blocks[y, x] != null)
@@ -92,7 +59,6 @@ namespace ZTetris.Assets
                             return true;
                     }
                 }
-            }
             return false;
         }
 
@@ -101,7 +67,6 @@ namespace ZTetris.Assets
             if (IsConflict(tetromino)) return;
 
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
-            {
                 for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
                 {
                     if (tetromino.Blocks[y, x] != null)
@@ -109,7 +74,6 @@ namespace ZTetris.Assets
                         Blocks[y + tetromino.Coordinates.Y, x + tetromino.Coordinates.X] = tetromino.Blocks[y, x].Clone();
                     }
                 }
-            }
         }
 
         public void UpdateLines()
@@ -164,10 +128,27 @@ namespace ZTetris.Assets
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Texture, new Vector2(0, 32), Color.White); //draws the board
+            //spriteBatch.Draw(Texture, new Vector2(0, 32), Color.White); //draws the board
 
+            { //Draw Board
+                Block boardBlock = new Block(default);
+                for (int y = 2; y <= YLength; y++)
+                {
+                    boardBlock.Coordinates = new Coordinate(-1, y);
+                    boardBlock.Draw(spriteBatch);
+                    boardBlock.Coordinates = new Coordinate(XLength, y);
+                    boardBlock.Draw(spriteBatch);
+
+                }
+                for (int x = 0; x < XLength; x++)
+                {
+                    boardBlock.Coordinates = new Coordinate(x, YLength);
+                    boardBlock.Draw(spriteBatch);
+                }
+            }
+
+            //Draw Blocks
             for (int y = 0; y < Blocks.GetLength(0); y++)
-            {
                 for (int x = 0; x < Blocks.GetLength(1); x++)
                 {
                     if (Blocks[y, x] != null)
@@ -175,7 +156,8 @@ namespace ZTetris.Assets
                         Blocks[y, x].Draw(spriteBatch);
                     }
                 }
-            }
+
+            //tetrominoManager.Draw(spriteBatch);
         }
         //End Interface Methods
     }

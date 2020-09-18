@@ -23,6 +23,11 @@ namespace ZTetris
             }
         }
         private Coordinate coordinates;
+        public Vector2 Position
+        {
+            get => position;
+            set => position = value;
+        }
         private Vector2 position;
 
         public Color Color

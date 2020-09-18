@@ -46,6 +46,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Coordinate.cs" />
+    <Compile Include="Controls.cs" />
     <Compile Include="GameText.cs" />
     <Compile Include="IGameEntity.cs" />
     <Compile Include="Input.cs" />

@@ -22,3 +22,6 @@ C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.cspr
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.exe
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.pdb
 C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\obj\Debug\ZTetris.csprojAssemblyReference.cache
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\ThinBlock.xnb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\Block8x8.xnb
+C:\Users\Tom\Desktop\projects\coding\cSharp\repos\ZTetris\bin\DesktopGL\AnyCPU\Debug\Assets\ThinBlock8x8.xnb
