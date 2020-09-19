@@ -26,9 +26,9 @@ namespace ZTetris
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(Font, "Lines Cleared: " + LinesCleared, new Vector2(0, 368), Color.White);
-            spriteBatch.DrawString(Font, "Next:", new Vector2(192, 32), Color.White);
-            spriteBatch.DrawString(Font, "Hold:", new Vector2(-72, 32), Color.White);
+            spriteBatch.DrawString(Font, "Lines Cleared: " + LinesCleared, new Vector2(0, Settings.GridSize*23), Color.White);
+            spriteBatch.DrawString(Font, "Next:", new Vector2(Settings.GridSize*12, Settings.GridSize*2), Color.White);
+            spriteBatch.DrawString(Font, "Hold:", new Vector2(-((Settings.GridSize*4)+(Settings.GridSize/2)), Settings.GridSize * 2), Color.White);
         }
     }
 }

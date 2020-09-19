@@ -37,8 +37,8 @@ namespace ZTetris
         {
             this.Window.AllowUserResizing = false;
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = 420;
-            graphics.PreferredBackBufferWidth = 350;
+            graphics.PreferredBackBufferHeight = Settings.GridSize*26;
+            graphics.PreferredBackBufferWidth = Settings.GridSize*22;
 
             Content.RootDirectory = "Assets";
         }
@@ -93,7 +93,7 @@ namespace ZTetris
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            Block.Texture = this.Content.Load<Texture2D>("ThinBlock"); //16px*16px texture
+            Block.Texture = this.Content.Load<Texture2D>("Block32x32"); //16px*16px texture
             Board.Texture = this.Content.Load<Texture2D>("Board"); //192px*336px texture
 
             GameText.Font = this.Content.Load<SpriteFont>("PressStart");
@@ -136,6 +136,9 @@ namespace ZTetris
             if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
                 tetrominoManager.HardDrop();
 
+            if (currentState.IsKeyDown(Keys.W) && previousState.IsKeyUp(Keys.W))
+                tetrominoManager.HalfDrop();
+
             if (currentState.IsKeyDown(Keys.D) && previousState.IsKeyUp(Keys.D))
                 tetrominoManager.RotateClockwise();
 
@@ -148,12 +151,10 @@ namespace ZTetris
             if (currentState.IsKeyDown(Keys.LeftShift) && previousState.IsKeyUp(Keys.LeftShift))
                 tetrominoManager.Hold();
 
+            //debug
             if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
                 tetrominoManager.CurrentTetromino.Coordinates -= new Coordinate(0, 1);
 
-
-            if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q))
-                tetrominoManager.CurrentTetromino.Position = new Vector2(4, 0);
 
 
 

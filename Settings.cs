@@ -22,6 +22,6 @@ namespace ZTetris
 
         public static int NextTetrominoesShown = 6;
 
-        public static int GridSize = 16;
+        public static int GridSize = 32;
     }
 }

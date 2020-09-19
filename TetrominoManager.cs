@@ -67,16 +67,27 @@ namespace ZTetris
             {
                 heldTetrominoShape = value;
                 heldTetromino = new Tetromino((TetrominoShape)value);
-                heldTetromino.Position = new Vector2(-72, 56);
+                heldTetromino.Position = new Vector2(-((Settings.GridSize*4)+(Settings.GridSize/2)), ((Settings.GridSize * 3) + (Settings.GridSize / 2)));
+                //heldTetromino.Position += heldTetromino.Shape switch
+                //{
+                //    TetrominoShape.I => new Vector2(0, -4),
+                //    TetrominoShape.O => new Vector2(16, 4),
+                //    TetrominoShape.T => new Vector2(8, 4),
+                //    TetrominoShape.L => new Vector2(8, 4),
+                //    TetrominoShape.J => new Vector2(8, 4),
+                //    TetrominoShape.S => new Vector2(8, 4),
+                //    TetrominoShape.Z => new Vector2(8, 4),
+                //    _ => throw new MissingFieldException(),
+                //};
                 heldTetromino.Position += heldTetromino.Shape switch
                 {
-                    TetrominoShape.I => new Vector2(0, -4),
-                    TetrominoShape.O => new Vector2(16, 4),
-                    TetrominoShape.T => new Vector2(8, 4),
-                    TetrominoShape.L => new Vector2(8, 4),
-                    TetrominoShape.J => new Vector2(8, 4),
-                    TetrominoShape.S => new Vector2(8, 4),
-                    TetrominoShape.Z => new Vector2(8, 4),
+                    TetrominoShape.I => new Vector2(0, -(Settings.GridSize/4)),
+                    TetrominoShape.O => new Vector2(Settings.GridSize, (Settings.GridSize/4)),
+                    TetrominoShape.T => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.L => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.J => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.S => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.Z => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
                     _ => throw new MissingFieldException(),
                 };
             }
@@ -118,7 +129,10 @@ namespace ZTetris
         {
             CurrentTetromino.Coordinates += new Coordinate(0, 1);
         }
-
+        public void HalfDrop()
+        {
+            MoveTetrominoToGhost();
+        }
         public void HardDrop()
         {
             MoveTetrominoToGhost();
@@ -197,16 +211,16 @@ namespace ZTetris
             for (int i = 0; i < nextTetrominoesShape.Count(); i++)
             {
                 Tetromino nextTetromino = new Tetromino(nextTetrominoesShape[i]);
-                nextTetromino.Position = new Vector2(200, (i*40) + 56);
+                nextTetromino.Position = new Vector2((Settings.GridSize*12)+(Settings.GridSize/2), (i*((Settings.GridSize*2)+(Settings.GridSize/2))) + ((Settings.GridSize*3)+(Settings.GridSize/2)));
                 nextTetromino.Position += nextTetromino.Shape switch
                 {
-                    TetrominoShape.I => new Vector2(0, -4),
-                    TetrominoShape.O => new Vector2(16, 4),
-                    TetrominoShape.T => new Vector2(8, 4),
-                    TetrominoShape.L => new Vector2(8, 4),
-                    TetrominoShape.J => new Vector2(8, 4),
-                    TetrominoShape.S => new Vector2(8, 4),
-                    TetrominoShape.Z => new Vector2(8, 4),
+                    TetrominoShape.I => new Vector2(0, -(Settings.GridSize / 4)),
+                    TetrominoShape.O => new Vector2(Settings.GridSize, (Settings.GridSize / 4)),
+                    TetrominoShape.T => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.L => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.J => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.S => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
+                    TetrominoShape.Z => new Vector2((Settings.GridSize / 2), (Settings.GridSize / 4)),
                     _ => throw new MissingFieldException(),
                 };
                 nextTetromino.Draw(spriteBatch);
