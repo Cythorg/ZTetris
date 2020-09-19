@@ -59,6 +59,8 @@ namespace ZTetris
         }
         private TetrominoShape[] nextTetrominoesShape;
         private Tetromino[] nextTetrominoes;
+        private TetrominoShape[] bag1;
+        private TetrominoShape[] bag2;
 
         public TetrominoShape? HeldTetrominoShape
         {
@@ -81,7 +83,7 @@ namespace ZTetris
             }
         }  
         private Tetromino heldTetromino;
-
+        private bool canHold = true;
 
         private readonly Board board;
         private readonly Random random;
@@ -92,7 +94,13 @@ namespace ZTetris
         {
             this.board = board;
             random = new Random();
-            CurrentTetromino = new Tetromino((TetrominoShape)(random.Next(5))); //prevents an S or Z piece from being the first piece
+            bag1 = GenerateBag();
+            if (bag1[0] == TetrominoShape.S || bag1[0] == TetrominoShape.Z) //ugly code, stops S or Z piece from being first piece
+                while (bag1[0] == TetrominoShape.S || bag1[0] == TetrominoShape.Z)
+                    bag1 = GenerateBag();
+            bag2 = GenerateBag();
+
+            CurrentTetromino = new Tetromino(bag1[0]); //prevents an S or Z piece from being the first piece
             nextTetrominoesShape = new TetrominoShape[Settings.NextTetrominoesShown];
             for (int i = 0; i < nextTetrominoesShape.Length; i++)
                 nextTetrominoesShape[i] = RandomPiece;
@@ -139,35 +147,49 @@ namespace ZTetris
         {
             Tetromino futureTetromino = CurrentTetromino.Clone();
             futureTetromino.RotateClockwise90();
-            if (board.IsConflict(futureTetromino) == false)
-                CurrentTetromino.RotateClockwise90();
-            else
+            if (board.IsConflict(futureTetromino))
             {
-                //kick (up to two spaces)
-            };
-                
+                if (CanKick(futureTetromino))
+                {
+                    CurrentTetromino.Coordinates = futureTetromino.Coordinates;
+                    CurrentTetromino.RotateClockwise90();
+                    return;
+                }
+                return;
+            }
+            CurrentTetromino.RotateClockwise90();
         }
         public void RotateAntiClockwise()
         {
             Tetromino futureTetromino = CurrentTetromino.Clone();
             futureTetromino.RotateAntiClockwise90();
-            if (board.IsConflict(futureTetromino) == false)
-                CurrentTetromino.RotateAntiClockwise90();
-            else
+            if (board.IsConflict(futureTetromino))
             {
-                //kick (up to two spaces)
-            };
+                if (CanKick(futureTetromino))
+                {
+                    CurrentTetromino.Coordinates = futureTetromino.Coordinates;
+                    CurrentTetromino.RotateAntiClockwise90();
+                    return;
+                }
+                return;
+            }
+            CurrentTetromino.RotateAntiClockwise90();
         }
         public void Rotate180()
         {
             Tetromino futureTetromino = CurrentTetromino.Clone();
             futureTetromino.Rotate180();
-            if (board.IsConflict(futureTetromino) == false)
-                CurrentTetromino.Rotate180();
-            else
+            if (board.IsConflict(futureTetromino))
             {
-                //kick (up to two spaces)
-            };
+                if (CanKick(futureTetromino))
+                {
+                    CurrentTetromino.Coordinates = futureTetromino.Coordinates;
+                    CurrentTetromino.Rotate180();
+                    return;
+                }
+                return;
+            }
+            CurrentTetromino.Rotate180();
         }
 
         public void Hold()
@@ -181,6 +203,7 @@ namespace ZTetris
         //Private Methods
         private void UseNextTetromino()
         {
+            canHold = true;
             CurrentTetromino = new Tetromino(NextTetrominoesShape[0]);
             for (int i = 0; i < NextTetrominoesShape.Length - 1; i++)
                 NextTetrominoesShape[i] = NextTetrominoesShape[i + 1];
@@ -188,10 +211,13 @@ namespace ZTetris
         }
         private void SwapHeldTetrominoWithCurrentTetromino()
         {
+            if (canHold == false) return;
+            canHold = false;
             if (HeldTetrominoShape == null)
             {
                 HeldTetrominoShape = CurrentTetromino.Shape;
                 UseNextTetromino();
+                canHold = false;
                 return;
             }
             TetrominoShape tempTetrominoShape = CurrentTetromino.Shape;
@@ -202,7 +228,6 @@ namespace ZTetris
         {
             CurrentTetromino.Coordinates = GhostTetromino.Coordinates;
         }
-
         private void AddTetrominoToBoard()
         {
             board.AddTetromino(CurrentTetromino);
@@ -210,6 +235,11 @@ namespace ZTetris
 
         private TetrominoShape[] GenerateBag()
         {
+            //I know this is dumb, 
+            //I just can't be bothered to change it
+            //and it's funny to me that it is this bad.
+            //it's got a big O of O(∞) lmfao
+            //i'm actually rather proud to be quite frank.
             TetrominoShape?[] bag = new TetrominoShape?[7];
             for (int i = 0; i < bag.Length; i++)
             {
@@ -226,6 +256,71 @@ namespace ZTetris
 
             return castedBag;
         }
+
+        private bool CanKick(Tetromino futureTetromino)
+        {
+            futureTetromino.Coordinates += new Coordinate(1, 0); //can right kick 1 tile
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates -= new Coordinate(1, 0);
+
+            futureTetromino.Coordinates -= new Coordinate(1, 0); //can left Kick 1 tile
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates += new Coordinate(1, 0);
+
+            futureTetromino.Coordinates += new Coordinate(0, 1); //can down Kick 1 tile
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates -= new Coordinate(0, 1);
+
+            futureTetromino.Coordinates -= new Coordinate(0, 1); //can floor Kick 1 tile
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates += new Coordinate(0, 1);
+
+            futureTetromino.Coordinates += new Coordinate(2, 0); //can right Kick 2 tiles
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates -= new Coordinate(2, 0);
+
+            futureTetromino.Coordinates -= new Coordinate(2, 0); //can left kick 2 tiles
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates += new Coordinate(2, 0);
+
+            futureTetromino.Coordinates += new Coordinate(0, 2); //can down Kick 2 tiles
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates -= new Coordinate(0, 2);
+
+            futureTetromino.Coordinates -= new Coordinate(0, 2); //can floor Kick 2 tiles
+            if (board.IsConflict(futureTetromino) == false)
+                return true;
+            futureTetromino.Coordinates += new Coordinate(0, 2);
+
+            return false; //cannot kick
+        }
+
+        private void ApplyGravity(GameTime gameTime)
+        {
+            if (gameTime.TotalGameTime > new TimeSpan(0, 0, 0, 0, 1000)) //todo: gimpy way of doing timings lol (FIX)
+            {
+                Tetromino futureTetromino = CurrentTetromino.Clone();
+                futureTetromino.Coordinates += new Coordinate(0, 1);
+                if (board.IsConflict(futureTetromino))
+                {
+                    AddTetrominoToBoard();
+                    UseNextTetromino();
+                    gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+                }
+                else
+                {
+                    gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+                    CurrentTetromino.Coordinates += new Coordinate(0, 1);
+                }
+            }
+        }
         //End Private Methods
 
         //Interface Methods
@@ -237,7 +332,7 @@ namespace ZTetris
         //IGameEntity
         public void Update(GameTime gameTime)
         {
-            //
+            ApplyGravity(gameTime);
         }
         public void Draw(SpriteBatch spriteBatch)
         {

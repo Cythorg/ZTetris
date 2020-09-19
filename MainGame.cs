@@ -151,8 +151,6 @@ namespace ZTetris
                 tetrominoManager.Hold();
 
             //debug
-            if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
-                tetrominoManager.CurrentTetromino.Coordinates -= new Coordinate(0, 1);
 
             if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q)) { }
                 //
