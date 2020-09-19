@@ -61,6 +61,7 @@ namespace ZTetris
         private Tetromino[] nextTetrominoes;
         private TetrominoShape[] bag1;
         private TetrominoShape[] bag2;
+        private int iterator;
 
         public TetrominoShape? HeldTetrominoShape
         {
@@ -100,10 +101,10 @@ namespace ZTetris
                     bag1 = GenerateBag();
             bag2 = GenerateBag();
 
-            CurrentTetromino = new Tetromino(bag1[0]); //prevents an S or Z piece from being the first piece
+            CurrentTetromino = new Tetromino(bag1[0]);
             nextTetrominoesShape = new TetrominoShape[Settings.NextTetrominoesShown];
             for (int i = 0; i < nextTetrominoesShape.Length; i++)
-                nextTetrominoesShape[i] = RandomPiece;
+                nextTetrominoesShape[i] = bag1[i+1]; //todo: fix this shit, bad
         }
         //End Constructor
 
@@ -207,7 +208,17 @@ namespace ZTetris
             CurrentTetromino = new Tetromino(NextTetrominoesShape[0]);
             for (int i = 0; i < NextTetrominoesShape.Length - 1; i++)
                 NextTetrominoesShape[i] = NextTetrominoesShape[i + 1];
-            NextTetrominoesShape[NextTetrominoesShape.GetUpperBound(0)] = RandomPiece; //todo: implement 7 piece bag 'randomness' (issues in contructor too)
+            if (iterator < 7)
+            {
+                NextTetrominoesShape[NextTetrominoesShape.GetUpperBound(0)] = bag2[iterator]; //todo fix this shitty bodge code
+                iterator++;
+            }
+            else if(iterator == 7)
+            {
+                bag2 = GenerateBag();
+                iterator = 0;
+                NextTetrominoesShape[NextTetrominoesShape.GetUpperBound(0)] = bag2[iterator];
+            }
         }
         private void SwapHeldTetrominoWithCurrentTetromino()
         {

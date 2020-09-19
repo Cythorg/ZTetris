@@ -54,7 +54,12 @@ namespace ZTetris.Assets
         }
         public void AddTetromino(Tetromino tetromino)
         {
-            if (IsConflict(tetromino)) return; //possibly redundant
+            if (IsConflict(tetromino))
+            {
+                ClearBoard();
+                return;
+            }
+            //possibly redundant
 
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
                 for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
@@ -66,6 +71,14 @@ namespace ZTetris.Assets
                 }
 
             CheckLines();
+        }
+        public void ClearBoard()
+        {
+            for (int y = 0; y < YLength; y++)
+                for (int x = 0; x < XLength; x++)
+                    Blocks[y, x] = null;
+
+            LinesCleared = 0;
         }
         //End Public Methods
 

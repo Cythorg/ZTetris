@@ -115,40 +115,75 @@ namespace ZTetris
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            
+
 
             previousState = currentState;
             currentState = Keyboard.GetState();
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) //bad code ew gross go commit seppuku
                 Exit();
 
             if (currentState.IsKeyDown(Keys.Left) && previousState.IsKeyUp(Keys.Left))
+            {
                 tetrominoManager.MoveLeft();
-
+            }
             if (currentState.IsKeyDown(Keys.Right) && previousState.IsKeyUp(Keys.Right))
+            {
                 tetrominoManager.MoveRight();
+            }
+
 
             if (currentState.IsKeyDown(Keys.Down) && previousState.IsKeyUp(Keys.Down))
+            {
                 tetrominoManager.SoftDrop();
+                gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+            }
 
             if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
+            {
                 tetrominoManager.HardDrop();
+                gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+            }
 
             if (currentState.IsKeyDown(Keys.W) && previousState.IsKeyUp(Keys.W))
+            {
                 tetrominoManager.HalfDrop();
+                gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+            }
 
             if (currentState.IsKeyDown(Keys.D) && previousState.IsKeyUp(Keys.D))
+            {
                 tetrominoManager.RotateClockwise();
+                if (tetrominoManager.CurrentTetromino.Shape != TetrominoShape.O)
+                {
+                    gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+                }
+            }
+
 
             if (currentState.IsKeyDown(Keys.A) && previousState.IsKeyUp(Keys.A))
+            {
                 tetrominoManager.RotateAntiClockwise();
+                if (tetrominoManager.CurrentTetromino.Shape != TetrominoShape.O)
+                {
+                    gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+                }
+            }
 
             if (currentState.IsKeyDown(Keys.S) && previousState.IsKeyUp(Keys.S))
+            {
                 tetrominoManager.Rotate180();
+                if (tetrominoManager.CurrentTetromino.Shape != TetrominoShape.O)
+                {
+                    gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+                }
+            }
 
             if (currentState.IsKeyDown(Keys.LeftShift) && previousState.IsKeyUp(Keys.LeftShift))
+            {
                 tetrominoManager.Hold();
+                gameTime.TotalGameTime = new TimeSpan(0, 0, 0, 0, 0);
+            }
 
             //debug
 
