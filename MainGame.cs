@@ -93,8 +93,7 @@ namespace ZTetris
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            Block.Texture = this.Content.Load<Texture2D>("Block32x32"); //16px*16px texture
-            Board.Texture = this.Content.Load<Texture2D>("Board"); //192px*336px texture
+            Block.Texture = this.Content.Load<Texture2D>("ThinBlock"); //16px*16px texture
 
             GameText.Font = this.Content.Load<SpriteFont>("PressStart");
 
@@ -154,6 +153,9 @@ namespace ZTetris
             //debug
             if (currentState.IsKeyDown(Keys.Up) && previousState.IsKeyUp(Keys.Up))
                 tetrominoManager.CurrentTetromino.Coordinates -= new Coordinate(0, 1);
+
+            if (currentState.IsKeyDown(Keys.Q) && previousState.IsKeyUp(Keys.Q)) { }
+                //
 
 
 

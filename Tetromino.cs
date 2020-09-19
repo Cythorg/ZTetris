@@ -226,8 +226,6 @@ namespace ZTetris
                 }
         }
         //End Interface Methods
-
-
     }
 }
 

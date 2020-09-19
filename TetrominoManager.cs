@@ -62,23 +62,11 @@ namespace ZTetris
 
         public TetrominoShape? HeldTetrominoShape
         {
-            get => heldTetrominoShape;
+            get => heldTetromino?.Shape;
             set
             {
-                heldTetrominoShape = value;
                 heldTetromino = new Tetromino((TetrominoShape)value);
                 heldTetromino.Position = new Vector2(-((Settings.GridSize*4)+(Settings.GridSize/2)), ((Settings.GridSize * 3) + (Settings.GridSize / 2)));
-                //heldTetromino.Position += heldTetromino.Shape switch
-                //{
-                //    TetrominoShape.I => new Vector2(0, -4),
-                //    TetrominoShape.O => new Vector2(16, 4),
-                //    TetrominoShape.T => new Vector2(8, 4),
-                //    TetrominoShape.L => new Vector2(8, 4),
-                //    TetrominoShape.J => new Vector2(8, 4),
-                //    TetrominoShape.S => new Vector2(8, 4),
-                //    TetrominoShape.Z => new Vector2(8, 4),
-                //    _ => throw new MissingFieldException(),
-                //};
                 heldTetromino.Position += heldTetromino.Shape switch
                 {
                     TetrominoShape.I => new Vector2(0, -(Settings.GridSize/4)),
@@ -92,7 +80,6 @@ namespace ZTetris
                 };
             }
         }  
-        private TetrominoShape? heldTetrominoShape;
         private Tetromino heldTetromino;
 
 
@@ -105,7 +92,7 @@ namespace ZTetris
         {
             this.board = board;
             random = new Random();
-            CurrentTetromino = new Tetromino(RandomPiece);
+            CurrentTetromino = new Tetromino((TetrominoShape)(random.Next(5))); //prevents an S or Z piece from being the first piece
             nextTetrominoesShape = new TetrominoShape[Settings.NextTetrominoesShown];
             for (int i = 0; i < nextTetrominoesShape.Length; i++)
                 nextTetrominoesShape[i] = RandomPiece;
@@ -117,17 +104,25 @@ namespace ZTetris
         //CONTROLS
         public void MoveLeft() //TODO: implement DAS "Delayed auto shift" in input class not this class?
         {
-            CurrentTetromino.Coordinates -= new Coordinate(1, 0);
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.Coordinates -= new Coordinate(1, 0);
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.Coordinates -= new Coordinate(1, 0);
         }
-
         public void MoveRight()
         {
-            CurrentTetromino.Coordinates += new Coordinate(1, 0);
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.Coordinates += new Coordinate(1, 0);
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.Coordinates += new Coordinate(1, 0);
         }
 
         public void SoftDrop()
         {
-            CurrentTetromino.Coordinates += new Coordinate(0, 1);
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.Coordinates += new Coordinate(0, 1);
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.Coordinates += new Coordinate(0, 1);
         }
         public void HalfDrop()
         {
@@ -142,17 +137,37 @@ namespace ZTetris
 
         public void RotateClockwise()
         {
-            CurrentTetromino.RotateClockwise90();
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.RotateClockwise90();
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.RotateClockwise90();
+            else
+            {
+                //kick (up to two spaces)
+            };
+                
         }
-
         public void RotateAntiClockwise()
         {
-            CurrentTetromino.RotateAntiClockwise90();
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.RotateAntiClockwise90();
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.RotateAntiClockwise90();
+            else
+            {
+                //kick (up to two spaces)
+            };
         }
-
         public void Rotate180()
         {
-            CurrentTetromino.Rotate180();
+            Tetromino futureTetromino = CurrentTetromino.Clone();
+            futureTetromino.Rotate180();
+            if (board.IsConflict(futureTetromino) == false)
+                CurrentTetromino.Rotate180();
+            else
+            {
+                //kick (up to two spaces)
+            };
         }
 
         public void Hold()
@@ -169,7 +184,7 @@ namespace ZTetris
             CurrentTetromino = new Tetromino(NextTetrominoesShape[0]);
             for (int i = 0; i < NextTetrominoesShape.Length - 1; i++)
                 NextTetrominoesShape[i] = NextTetrominoesShape[i + 1];
-            NextTetrominoesShape[NextTetrominoesShape.GetUpperBound(0)] = RandomPiece;
+            NextTetrominoesShape[NextTetrominoesShape.GetUpperBound(0)] = RandomPiece; //todo: implement 7 piece bag 'randomness' (issues in contructor too)
         }
         private void SwapHeldTetrominoWithCurrentTetromino()
         {
@@ -190,7 +205,26 @@ namespace ZTetris
 
         private void AddTetrominoToBoard()
         {
-            board.AddTetrominoToBoard(CurrentTetromino);
+            board.AddTetromino(CurrentTetromino);
+        }
+
+        private TetrominoShape[] GenerateBag()
+        {
+            TetrominoShape?[] bag = new TetrominoShape?[7];
+            for (int i = 0; i < bag.Length; i++)
+            {
+                bag[i] = RandomPiece;
+                for (int j = 0; j < i; j++)
+                {
+                    if (bag[i] == bag[j])
+                        i--;
+                }
+            }
+            TetrominoShape[] castedBag = new TetrominoShape[7];
+            for (int i = 0; i < castedBag.Length; i++)
+                castedBag[i] = (TetrominoShape)bag[i];
+
+            return castedBag;
         }
         //End Private Methods
 
@@ -198,10 +232,9 @@ namespace ZTetris
         //IGameComponent
         public void Initialize()
         {
-            Console.WriteLine("Initialised from tetrominomanager class");
             //
         }
-        //IGameEntity????
+        //IGameEntity
         public void Update(GameTime gameTime)
         {
             //

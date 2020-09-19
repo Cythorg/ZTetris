@@ -15,26 +15,17 @@ namespace ZTetris.Assets
 {
     class Board : IGameEntity
     {
-        public static Texture2D Texture;
-
-        public int LinesCleared;
+        public int LinesCleared; //score?
 
         public int XLength { get; private set; }
         public int YLength { get; private set; }
 
         Block[,] Blocks
         {
-            get
-            {
-                return blocks;
-            }
-            set
-            {
-                blocks = value;
-            }
+            get => blocks;
+            set => blocks = value;
         }
         private Block[,] blocks;
-
 
         //Constructor
         public Board(int xLength = 10, int yLength = 22) //this is the conventional default tetris board size
@@ -45,7 +36,7 @@ namespace ZTetris.Assets
         }
         //End Constructor
 
-
+        //Public Methods
         public bool IsConflict(Tetromino tetromino)
         {
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
@@ -61,10 +52,9 @@ namespace ZTetris.Assets
                 }
             return false;
         }
-
-        public void AddTetrominoToBoard(Tetromino tetromino)
+        public void AddTetromino(Tetromino tetromino)
         {
-            if (IsConflict(tetromino)) return;
+            if (IsConflict(tetromino)) return; //possibly redundant
 
             for (int y = 0; y < tetromino.Blocks.GetLength(0); y++)
                 for (int x = 0; x < tetromino.Blocks.GetLength(1); x++)
@@ -74,9 +64,13 @@ namespace ZTetris.Assets
                         Blocks[y + tetromino.Coordinates.Y, x + tetromino.Coordinates.X] = tetromino.Blocks[y, x].Clone();
                     }
                 }
-        }
 
-        public void UpdateLines()
+            CheckLines();
+        }
+        //End Public Methods
+
+        //Private Methods
+        private void CheckLines() //could do with optimising
         {
             for (int y = 0; y < Blocks.GetLength(0); y++)
             {
@@ -95,8 +89,7 @@ namespace ZTetris.Assets
                 }
             }
         }
-
-        public void ClearLine(int fromY)
+        private void ClearLine(int fromY)
         {
             LinesCleared += 1;
             for (int y = fromY; y >= 0; y--)
@@ -117,37 +110,26 @@ namespace ZTetris.Assets
                 }
             }
         }
-
-        //Interface Methods
-        public void Update(GameTime gameTime)
+        private void DrawBoard(SpriteBatch spriteBatch)
         {
+            //Draw board using single blocks
+            Block boardBlock = new Block(default);
+            for (int y = 2; y <= YLength; y++)
+            {
+                boardBlock.Coordinates = new Coordinate(-1, y);
+                boardBlock.Draw(spriteBatch);
+                boardBlock.Coordinates = new Coordinate(XLength, y);
+                boardBlock.Draw(spriteBatch);
 
-            UpdateLines();
-
-            GameText.LinesCleared = LinesCleared.ToString();
-        }
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            //spriteBatch.Draw(Texture, new Vector2(0, 32), Color.White); //draws the board
-
-            { //Draw Board
-                Block boardBlock = new Block(default);
-                for (int y = 2; y <= YLength; y++)
-                {
-                    boardBlock.Coordinates = new Coordinate(-1, y);
-                    boardBlock.Draw(spriteBatch);
-                    boardBlock.Coordinates = new Coordinate(XLength, y);
-                    boardBlock.Draw(spriteBatch);
-
-                }
-                for (int x = 0; x < XLength; x++)
-                {
-                    boardBlock.Coordinates = new Coordinate(x, YLength);
-                    boardBlock.Draw(spriteBatch);
-                }
             }
-
-            //Draw Blocks
+            for (int x = 0; x < XLength; x++)
+            {
+                boardBlock.Coordinates = new Coordinate(x, YLength);
+                boardBlock.Draw(spriteBatch);
+            }
+        }
+        private void DrawBlocks(SpriteBatch spriteBatch)
+        {
             for (int y = 0; y < Blocks.GetLength(0); y++)
                 for (int x = 0; x < Blocks.GetLength(1); x++)
                 {
@@ -156,8 +138,21 @@ namespace ZTetris.Assets
                         Blocks[y, x].Draw(spriteBatch);
                     }
                 }
+        }
+        //End Private Methods
 
-            //tetrominoManager.Draw(spriteBatch);
+        //Interface Methods
+        public void Update(GameTime gameTime)
+        {
+            GameText.LinesCleared = LinesCleared.ToString();
+        }
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            //Draw board using single blocks
+            DrawBoard(spriteBatch);
+
+            //Draw individual blocks
+            DrawBlocks(spriteBatch);
         }
         //End Interface Methods
     }
